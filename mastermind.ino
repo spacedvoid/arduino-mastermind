@@ -3,6 +3,7 @@
 
 // -- Predefinition --
 namespace mastermind {
+  const uint8_t button1 = 48, button2 = 42, button3 = 34, button4 = 26;
   void init();
   namespace lines {
     void setting();
@@ -48,15 +49,19 @@ namespace mastermind {
 void setup() {
   Serial.begin(9600);
   RGBMatrixInit();
-}
-
-void loop() {
   mastermind::init();
 }
 
-namespace mastermind {
-  const uint8_t button1 = 48, button2 = 42, button3 = 34, button4 = 26;
+void loop() {
+  while(true) {
+    switch (mastermind::util::waitInput()) {
+       case mastermind::button1: mastermind::game::start(); break;
+       case mastermind::button2: mastermind::lines::setting(); break;
+    }
+  }
+}
 
+namespace mastermind {
   void init() {
     ui::menu();
   }
@@ -118,12 +123,18 @@ namespace mastermind {
       while(true) {
         switch(util::waitInput()) {
           case button1: {
-            if(current[1] > 1) current[1]--;
+            if(current[1] > 1) {
+              current[1]--;
+              color = colors[current[1]];
+            }
           }
-          case button2: if(color > 0) color--;
-          case button3: if(color < 6) color++;
+          case button2: colorNext(); break;
+          case button3: colorPrevious(); break;
           case button4: {
-            if(current[1] < 4) current[1]++;
+            if(current[1] < 4) {
+              current[1]++;
+              colors[current[1]] = color;
+            }
             else {
              if(current[0] < attempts) {
                for(int i = 0; i < 4; i++) {
@@ -223,12 +234,6 @@ namespace mastermind {
   namespace ui {
     void menu() {
       draw::square(0, 0, 7, 7, color::NONE);
-      while(true) {
-        switch (util::waitInput()) {
-          case button1: game::start(); break;
-          case button2: lines::setting(); break;
-        }
-      }
     }
 
     void game() {
