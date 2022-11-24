@@ -12,7 +12,7 @@ namespace mastermind {
     void loop();
     void colorNext();
     void colorPrevious();
-    void getAbsoluteLocation();
+    byte* getAbsoluteLocation();
     void setAnswer();
     void showHint();
     void end(bool isSuccess);
@@ -37,7 +37,7 @@ namespace mastermind {
     void point(byte x, byte y, color::colorType color);
     void line(byte startX, byte startY, byte endX, byte endY, color::colorType color);
     void square(byte startX, byte startY, byte endX, byte endY, color::colorType color);
-    void pointAbsolute(byte[] point, color::colorType color);
+    void pointAbsolute(byte* point, color::colorType color);
   }
   namespace util {
     uint8_t waitInput();
@@ -59,6 +59,30 @@ namespace mastermind {
 
   void init() {
     ui::menu();
+  }
+
+  namespace color {
+    const colorType NONE = {0, 0, 0};
+    const colorType WHITE = {255, 255, 255};
+    const colorType RED = {255, 0, 0};
+    const colorType GREEN = {0, 255, 0};
+    const colorType BLUE = {0, 0, 255};
+    const colorType YELLOW = {255, 255, 0};
+    const colorType ORANGE = {255, 128, 0};
+    const colorType PURPLE = {127, 0, 255};
+    const colorType MAGENTA = {255, 0, 255};
+
+    colorType getColorType(int numeric) {
+      switch(numeric) {
+        case 0: return RED;
+        case 1: return YELLOW;
+        case 2: return GREEN;
+        case 4: return BLUE;
+        case 5: return PURPLE;
+        case 6: return MAGENTA;
+        default: return NONE;
+      }
+    }
   }
 
   namespace lines {
@@ -86,10 +110,6 @@ namespace mastermind {
       memset(current, 1, 2);
       color = 0;
       memset(colors, -1, 4);
-      draw::square(0, 1, 7, 6, color::NONE);
-      draw::line(0, 7, 3, 7, color::WHITE);
-      draw::line(4, 7, 7, 7, color::RED);
-      draw::line(0, 0, 7, 0, color::PURPLE);
       setAnswer();
       loop();
     }
@@ -134,7 +154,7 @@ namespace mastermind {
       draw::pointAbsolute(getAbsoluteLocation(), color::getColorType(color));
     }
 
-    int* getAbsoluteLocation() {
+    byte* getAbsoluteLocation() {
       byte location[2] = {1, 7};
       location[0] += current[0] - 1;
       location[1] -= current[1] - 1;
@@ -151,7 +171,7 @@ namespace mastermind {
     void showHint() {
       int red = 0, white = 0;
       byte answerMark[4] = {0, 0, 0, 0};  // 0: unmarked, 1: red, 2: white  1 1 3 5 ans
-      bool colorsMark = {false, false, false, false};                     //5 1 4 5 colors
+      bool colorsMark[4] = {false, false, false, false};                     //5 1 4 5 colors
       for(int i = 0; i < 4; i++) {
         if(colors[i] == answer[i]) {
           red++;
@@ -199,29 +219,6 @@ namespace mastermind {
     }
   }
 
-  namespace color {
-    const colorType NONE = {0, 0, 0};
-    const colorType WHITE = {255, 255, 255};
-    const colorType RED = {255, 0, 0};
-    const colorType GREEN = {0, 255, 0};
-    const colorType BLUE = {0, 0, 255};
-    const colorType YELLOW = {255, 255, 0};
-    const colorType ORANGE = {255, 128, 0};
-    const colorType PURPLE = {127, 0, 255};
-    const colorType MAGENTA = {255, 0, 255};
-
-    colorType getColorType(int numeric) {
-      switch(numeric) {
-        case 0: return RED;
-        case 1: return YELLOW;
-        case 2: return GREEN;
-        case 4: return BLUE;
-        case 5: return PURPLE;
-        case 6: return MAGENTA;
-        default: return NONE;
-      }
-    }
-  }
 
   namespace ui {
     void menu() {
@@ -235,6 +232,7 @@ namespace mastermind {
     }
 
     void game() {
+      draw::square(0, 1, 7, 6, color::NONE);
       draw::line(0, 7, 3, 7, color::WHITE);
       draw::line(4, 7, 7, 7, color::RED);
       draw::line(0, 0, 7, 0, color::PURPLE);
@@ -262,7 +260,7 @@ namespace mastermind {
       image();
     }
 
-    void pointAbsolute(byte[] point, color::colorType color) {
+    void pointAbsolute(byte* point, color::colorType color) {
       draw_point(point, color.toHex());
       image();
     }
