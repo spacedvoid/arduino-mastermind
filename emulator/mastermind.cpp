@@ -1,5 +1,8 @@
-#include "rgbMatrix.h"
+#include "emulator.h"
 #include <time.h>
+#include <cstdint>
+#include <memory.h>
+#include <random>
 
 // -- Predefinition --
 namespace mastermind {
@@ -148,6 +151,10 @@ namespace mastermind {
                             }
                         }
                         current[0]++;
+                        if (current[0] > attempts) {
+                            end(false);
+                            return;
+                        }
                         current[1] = 0;
                         current_color = 0;
                         memset(colors, -1, 4);
@@ -178,12 +185,15 @@ namespace mastermind {
             return location;
         }
 
+#pragma warning(push)
+#pragma warning(disable:4244)
         void setAnswer() {
             srand(time(NULL));
             for (int i = 0; i < 4; i++) {
                 answer[i] = rand() % 7;
             }
         }
+#pragma warning(pop)
 
         void showHint() {
             int red = 0, white = 0;
@@ -269,15 +279,26 @@ namespace mastermind {
     namespace util {
         uint8_t waitInput() {
             while (true) {
-                if (digitalRead(button1) == HIGH)
+                char c = _getch();
+                if (c == '1') return button1;
+                else if (c == '2') return button2;
+                else if (c == '3') return button3;
+                else if (c == '4') return button4;
+                /*if (digitalRead(button1) == HIGH)
                     return button1;
                 else if (digitalRead(button2) == HIGH)
                     return button2;
                 else if (digitalRead(button3) == HIGH)
                     return button3;
                 else if (digitalRead(button4) == HIGH)
-                    return button4;
+                    return button4;*/
             }
         }
     }
+}
+
+int main() {
+    setup();
+    while (true) loop();
+    return 0;
 }
